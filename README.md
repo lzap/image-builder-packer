@@ -64,6 +64,8 @@ go run ./cmd/ibpacker/ \
     -blueprint ./cmd/ibpacker/blueprint_example.toml
 ```
 
+See [osbuild blueprint reference](https://osbuild.org/docs/user-guide/blueprint-reference/) for more info about blueprint format.
+
 ## LICENSE
 
 Apache Version 2.0
