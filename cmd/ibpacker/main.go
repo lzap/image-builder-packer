@@ -30,8 +30,7 @@ func main() {
 	defer cancel()
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
-	var hostname = flag.String("hostname", "", "SSH hostname")
-	var port = flag.Int("port", 22, "SSH port")
+	var hostname = flag.String("hostname", "", "SSH hostname or IP with optional port (e.g. example.com:22)")
 	var username = flag.String("username", "", "SSH username")
 	var distro = flag.String("distro", "fedora", "distribution name (fedora, centos, rhel, ...)")
 	var imageType = flag.String("type", "minimal-raw", "image type (minimal-raw, qcow2, ...)")
@@ -42,7 +41,6 @@ func main() {
 
 	cfg := ibk.SSHTransportConfig{
 		Host:     *hostname,
-		Port:     *port,
 		Username: *username,
 	}
 

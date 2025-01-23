@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"strings"
 	"sync"
+	"time"
 )
 
 // CombinedWriter is a writer that writes to a buffer and is safe for concurrent use.
@@ -44,12 +45,13 @@ func (w *CombinedWriter) Reset() {
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+var randSource = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // RandomString generates a random string of length n that is not cryptographically safe
 func RandomString(n int) string {
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
+		b[i] = letterBytes[randSource.Int63()%int64(len(letterBytes))]
 	}
 	return string(b)
 }

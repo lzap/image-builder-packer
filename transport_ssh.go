@@ -20,11 +20,8 @@ import (
 
 // SSHTransportConfig is a configuration struct for creating a new SSHTransport.
 type SSHTransportConfig struct {
-	// Host is the hostname or IP address of the remote machine.
+	// Host is the hostname or IP address of the remote machine including optional port (e.g. "example.com:22").
 	Host string
-
-	// Port is the port number of the remote machine. The default is 22.
-	Port int
 
 	// Username is the username to use for authentication.
 	Username string
@@ -159,10 +156,6 @@ func NewSSHTransport(cfg SSHTransportConfig) (*SSHTransport, error) {
 		return nil, ErrHostnameEmpty
 	}
 
-	if cfg.Port == 0 {
-		cfg.Port = 22
-	}
-
 	if cfg.Stdin == nil {
 		cfg.Stdin = os.Stdin
 	}
@@ -175,7 +168,11 @@ func NewSSHTransport(cfg SSHTransportConfig) (*SSHTransport, error) {
 		cfg.Stderr = os.Stderr
 	}
 
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), clientConf)
+	if !strings.Contains(cfg.Host, ":") {
+		cfg.Host = fmt.Sprintf("%s:22", cfg.Host)
+	}
+
+	client, err := ssh.Dial("tcp", cfg.Host, clientConf)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSSHDial, err)
 	}
