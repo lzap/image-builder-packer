@@ -1,4 +1,4 @@
-module github.com/osbuild/image-builder-packer
+module github.com/lzap/image-builder-packer
 
 go 1.23.4
 

@@ -20,7 +20,7 @@ import (
 	"os"
 	"time"
 
-	ibk "github.com/osbuild/image-builder-packer"
+	ibk "github.com/lzap/image-builder-packer"
 )
 
 // A utility for testing the code without packer integration

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	ibk "github.com/osbuild/image-builder-packer"
-	"github.com/osbuild/image-builder-packer/internal/sshtest"
+	ibk "github.com/lzap/image-builder-packer"
+	"github.com/lzap/image-builder-packer/internal/sshtest"
 )
 
 func TestPodmanDryRun(t *testing.T) {
