@@ -66,7 +66,15 @@ go run ./cmd/ibpacker/ \
 
 See [osbuild blueprint reference](https://osbuild.org/docs/user-guide/blueprint-reference/) for more info about blueprint format.
 
-## LICENSE
+## Testing
+
+To run unit and integration test against mock SSH server running on localhost:
+
+    go test .
+
+Keys in `internal/sshtest/keys.go` are just dummy (test only) keys, you may receive false positives from security scanners about leaked keys when cloning the repo.
+
+## LICENSE
 
 Apache Version 2.0
 
