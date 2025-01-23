@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// notsecret
 var PrivateKey = `-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
 QyNTUxOQAAACCXwb4kU7ktwVZ+a3XvcUBa5spbB2/HCXaY7iSTVczCIwAAALBAwllAQMJZ
@@ -15,7 +16,7 @@ QAAAAAtzc2gtZWQyNTUxOQAAACCXwb4kU7ktwVZ+a3XvcUBa5spbB2/HCXaY7iSTVczCIw
 AAAEDOtzrjmAq0+5qpnNLheYHdAVagfVoDBEazwrOqdpfiZJfBviRTuS3BVn5rde9xQFrm
 ylsHb8cJdpjuJJNVzMIjAAAAKGJ1aWxkZXJAenp6YXAudHBiLmxhYi5lbmcuYnJxLnJlZG
 hhdC5jb20BAgMEBQ==
------END OPENSSH PRIVATE KEY-----`
+-----END OPENSSH PRIVATE KEY-----` // notsecret
 
 var PublicKey = `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJfBviRTuS3BVn5rde9xQFrmylsHb8cJdpjuJJNVzMIj user@example.com`
 
