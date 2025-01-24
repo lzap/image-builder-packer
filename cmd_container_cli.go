@@ -33,62 +33,39 @@ type ContainerCliCommand struct {
 	// be created in the remote machine home directory. The caller must cleanup the directory.
 	OutputDir string
 
-	// DryRun is a flag to print the command instead of executing it. Blueprint is still pushed
-	// to the remote machine and then cleaned up.
-	DryRun bool
+	// Common arguments for all container commands.
+	Common CommonArgs
 
 	containerCmd      string
 	blueprintTempfile string
 }
 
 func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
-	buf := &CombinedWriter{}
+	var err error
 
 	// detect container runtime
-	err := t.Execute(ctx, StringCommand("which podman"), WithCombinedWriter(buf))
+	c.containerCmd, err = which(ctx, t, "podman", "docker")
 	if err != nil {
-		return fmt.Errorf("%w podman: %w", ErrConfigure, err)
-	}
-	c.containerCmd = buf.FirstLine()
-	slog.DebugContext(ctx, "detected podman", "path", c.containerCmd)
-
-	if c.containerCmd == "" {
-		buf.Reset()
-		err := t.Execute(ctx, StringCommand("which docker"), WithCombinedWriter(buf))
-		if err != nil {
-			return fmt.Errorf("%w docker: %w", ErrConfigure, err)
-		}
-		c.containerCmd = buf.FirstLine()
-		slog.DebugContext(ctx, "detected docker", "path", c.containerCmd)
-	}
-
-	if c.containerCmd == "" {
-		return fmt.Errorf("%w: no container runtime found", ErrConfigure)
+		return fmt.Errorf("%w: which: %w", ErrConfigure, err)
 	}
 
 	// detect architecture
 	if c.Arch != "" {
-		buf.Reset()
-		err = t.Execute(ctx, StringCommand("arch"), WithCombinedWriter(buf))
-		if err != nil {
-			return fmt.Errorf("%w arch: %w", ErrConfigure, err)
-		}
-		arch := buf.FirstLine()
-		slog.DebugContext(ctx, "detected architecture", "arch", arch)
+		arch, err := tail1(ctx, t, "arch")
+		slog.InfoContext(ctx, "detected architecture", "arch", arch)
 		if c.Arch != arch {
-			return fmt.Errorf("%w architecture mismatch: %w, output: %s", ErrConfigure, err, buf.String())
+			return fmt.Errorf("%w architecture mismatch: %w, output: %s", ErrConfigure, err, arch)
 		}
 	}
 
 	// create output dir if not set
 	if c.OutputDir == "" {
-		buf.Reset()
 		c.OutputDir = fmt.Sprintf("./output-%s", RandomString(13))
-		err = t.Execute(ctx, StringCommand("mkdir "+c.OutputDir), WithCombinedWriter(buf))
+		co, err := tail1(ctx, t, "mkdir "+c.OutputDir)
 		if err != nil {
-			return fmt.Errorf("%w mktemp: %w, output: %s", ErrConfigure, err, buf.String())
+			return fmt.Errorf("%w mktemp: %w, output: %s", ErrConfigure, err, co)
 		}
-		slog.DebugContext(ctx, "created output directory", "dir", c.OutputDir)
+		slog.InfoContext(ctx, "created output directory", "dir", c.OutputDir)
 	}
 
 	return nil
@@ -97,14 +74,17 @@ func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
 func (c *ContainerCliCommand) Push(ctx context.Context, pusher Pusher) error {
 	var err error
 
+	// push blueprint
 	c.blueprintTempfile, err = pusher.Push(ctx, c.Blueprint, "toml")
+	slog.InfoContext(ctx, "pushed blueprint", "file", c.blueprintTempfile)
+
 	return err
 }
 
 func (c *ContainerCliCommand) Build() string {
 	sb := strings.Builder{}
 
-	if c.DryRun {
+	if c.Common.DryRun {
 		sb.WriteString("echo")
 		sb.WriteRune(' ')
 	}
@@ -113,8 +93,16 @@ func (c *ContainerCliCommand) Build() string {
 	sb.WriteRune(' ')
 	sb.WriteString(c.containerCmd)
 	sb.WriteRune(' ')
-	sb.WriteString("run --privileged")
+	sb.WriteString("run --privileged --rm")
 	sb.WriteRune(' ')
+	if c.Common.Interactive {
+		sb.WriteString("-i")
+		sb.WriteRune(' ')
+	}
+	if c.Common.TTY {
+		sb.WriteString("-t")
+		sb.WriteRune(' ')
+	}
 	sb.WriteString("-v " + shellescape.Quote(c.OutputDir+":/output"))
 	sb.WriteRune(' ')
 	sb.WriteString("-v " + shellescape.Quote(c.blueprintTempfile+":"+c.blueprintTempfile))
@@ -128,6 +116,14 @@ func (c *ContainerCliCommand) Build() string {
 	sb.WriteString("--distro " + shellescape.Quote(c.Distro))
 	sb.WriteRune(' ')
 	sb.WriteString(shellescape.Quote(c.Type))
+
+	if c.Common.TeeLog {
+		sb.WriteRune(' ')
+		sb.WriteString("2>&1 | tee " + c.OutputDir + "/build.log")
+	}
+
+	sb.WriteRune(' ')
+	sb.WriteString("&& find " + c.OutputDir + " -type f")
 
 	return sb.String()
 }
