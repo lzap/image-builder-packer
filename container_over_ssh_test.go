@@ -116,7 +116,7 @@ func TestContainerOverSSH(t *testing.T) {
 			},
 		},
 		{
-			name: "stream9-raw-all-args",
+			name: "stream9-raw-all-args-docker",
 			cmd: &ibk.ContainerBootCommand{
 				Repository: "quay.io/centos-bootc/centos-bootc:stream9",
 				Type:       "raw",
@@ -134,6 +134,11 @@ func TestContainerOverSSH(t *testing.T) {
 				{
 					Request: "which podman",
 					Reply:   "/usr/bin/podman\n",
+					Status:  1,
+				},
+				{
+					Request: "which docker",
+					Reply:   "/usr/bin/docker\n",
 					Status:  0,
 				},
 				{
@@ -147,7 +152,7 @@ func TestContainerOverSSH(t *testing.T) {
 					Status:  0,
 				},
 				{
-					Request: "echo sudo podman pull quay.io/centos-bootc/centos-bootc:stream9",
+					Request: "echo sudo /usr/bin/docker pull quay.io/centos-bootc/centos-bootc:stream9",
 					Reply:   "",
 					Status:  0,
 				},
@@ -157,7 +162,7 @@ func TestContainerOverSSH(t *testing.T) {
 					Status:  0,
 				},
 				{
-					Request: "echo sudo /usr/bin/podman run --privileged --rm --pull=newer -i -t "+
+					Request: "echo sudo /usr/bin/docker run --privileged --rm --pull=newer -i -t "+
 					"--security-opt label=type:unconfined_t "+
 					"-v /var/lib/containers/storage:/var/lib/containers/storage "+
 					"-v ./output-hehwuXP6NyGIr:/output -v /tmp/ibpacker-o2rHJLEEkT68y.toml:/config.toml:ro "+
@@ -201,7 +206,7 @@ func TestContainerOverSSH(t *testing.T) {
 					Status:  0,
 				},
 				{
-					Request: "sudo podman pull quay.io/centos-bootc/centos-bootc:stream9",
+					Request: "sudo /usr/bin/podman pull quay.io/centos-bootc/centos-bootc:stream9",
 					Reply:   "",
 					Status:  0,
 				},

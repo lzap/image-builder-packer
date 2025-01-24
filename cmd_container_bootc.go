@@ -114,7 +114,7 @@ func (c *ContainerBootCommand) Configure(ctx context.Context, t Executor) error 
 	}
 
 	// pull the container
-	cmd := "sudo podman pull "+shellescape.Quote(c.Repository)
+	cmd := "sudo " + c.containerCmd + " pull "+shellescape.Quote(c.Repository)
 	if c.Common.DryRun {
 		cmd = "echo " + cmd
 	}

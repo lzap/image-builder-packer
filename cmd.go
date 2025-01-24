@@ -71,7 +71,8 @@ func which(ctx context.Context, exec Executor, name ...string) (string, error) {
 		slog.DebugContext(ctx, "running command", "cmd", cmd)
 		err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
 		if err != nil {
-			return "", err
+			buf.Reset()
+			continue
 		}
 		if binary := buf.FirstLine(); binary != "" {
 			slog.InfoContext(ctx, "found executable", "exec", binary)
