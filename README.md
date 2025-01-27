@@ -30,7 +30,7 @@ Cross-architecture building is currently not supported.
 
 To test this library directly, do:
 
-    go run github.com/lzap/image-builder-packer/cmd/ibpacker/ -help
+    go run github.com/lzap/packer-plugin-image-builder/cmd/ibpacker/ -help
 
 Use options to initiate a build:
 
@@ -55,7 +55,7 @@ Usage of ibpacker:
 For example:
 
 ```
-git clone github.com/lzap/image-builder-packer
+git clone github.com/lzap/packer-plugin-image-builder
 go run ./cmd/ibpacker/ \
     -hostname example.com \
     -username builder \

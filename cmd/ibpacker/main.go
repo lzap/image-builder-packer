@@ -22,7 +22,7 @@ import (
 	"os"
 	"time"
 
-	ibk "github.com/lzap/image-builder-packer"
+	ibk "github.com/lzap/packer-plugin-image-builder"
 	log "github.com/lzap/logslog"
 )
 
