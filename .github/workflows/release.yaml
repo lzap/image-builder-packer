@@ -35,7 +35,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - name: Describe plugin
         id: plugin_describe
-        run: echo "api_version=$(go run . describe | jq -r '.api_version')" >> $GITHUB_OUTPUT
+        run: echo "api_version=$(go run ./cmd/plugin describe | jq -r '.api_version')" >> $GITHUB_OUTPUT
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v6
