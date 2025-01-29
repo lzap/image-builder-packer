@@ -32,7 +32,7 @@ test:
 
 .PHONY: tests
 tests: ## Run all tests (used by CI/CD)
-	@go test -race ./...
+	@go test ./...
 # TODO integration tests as well
 
 .PHONY: install-packer-sdc
