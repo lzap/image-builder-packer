@@ -41,7 +41,7 @@ install-packer-sdc:
 
 .PHONY: plugin-check
 plugin-check: install-packer-sdc build
-	@packer-sdc plugin-check ${PLUGIN_DIR}/${BINARY}
+	$(shell cd ${PLUGIN_DIR}; packer-sdc plugin-check ${BINARY})
 
 .PHONY: generate
 generate: install-packer-sdc
