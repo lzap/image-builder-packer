@@ -11,7 +11,7 @@ PLUGIN_PATH=./cmd/plugin
 .PHONY: build
 build:
 	@mkdir -p ${PLUGIN_DIR}
-	@go build -ldflags="-X '${PLUGIN_FQN}/main.Version=$(shell git describe --tags --abbrev=0)'" -o ${PLUGIN_DIR}/${BINARY} ${PLUGIN_PATH}
+	@go build -ldflags="-X 'main.Version=$(shell git describe --tags --abbrev=0 | cut -b 2-)'" -o ${PLUGIN_DIR}/${BINARY} ${PLUGIN_PATH}
 	@sha256sum < ${PLUGIN_DIR}/${BINARY} > ${PLUGIN_DIR}/${BINARY}_SHA256SUM
 
 .PHONY: clean
@@ -42,6 +42,7 @@ install-packer-sdc:
 .PHONY: plugin-check
 plugin-check: install-packer-sdc build
 	$(shell cd ${PLUGIN_DIR}; packer-sdc plugin-check ${BINARY})
+	@${PLUGIN_DIR}/${BINARY} describe
 
 .PHONY: generate
 generate: install-packer-sdc
