@@ -95,16 +95,6 @@ func which(ctx context.Context, exec Executor, name ...string) (string, error) {
 	return "", ErrNoContainerRuntime
 }
 
-func exec(ctx context.Context, exec Executor, cmd string) (string, error) {
-	buf := &CombinedWriter{}
-	log.Printf("[DEBUG] Running command %q", cmd)
-	err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
-	if err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
 func tail1(ctx context.Context, exec Executor, cmd string) (string, error) {
 	buf := &CombinedWriter{}
 	log.Printf("[DEBUG] Running command %q", cmd)
