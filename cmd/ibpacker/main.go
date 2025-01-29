@@ -18,12 +18,12 @@ package main
 import (
 	"context"
 	"flag"
-	"log/slog"
+	"log"
 	"os"
 	"time"
 
+	"github.com/hashicorp/logutils"
 	ibk "github.com/lzap/packer-plugin-image-builder"
-	log "github.com/lzap/logslog"
 )
 
 func cli(ctx context.Context, args []string) {
@@ -148,7 +148,6 @@ var (
 	hostname    = flag.String("hostname", "", "SSH hostname or IP with optional port (e.g. example.com:22)")
 	username    = flag.String("username", "", "SSH username")
 	dryRun      = flag.Bool("dry-run", false, "dry run")
-	verbose     = flag.Bool("verbose", false, "verbose logging")
 	debug       = flag.Bool("debug", false, "debug logging")
 	interactive = flag.Bool("interactive", false, "pass --interactive mode to the container tool")
 	tty         = flag.Bool("tty", false, "pass --tty mode to the container tool")
@@ -166,23 +165,17 @@ func main() {
 		*teeLog = false
 	}
 
-	level := slog.LevelWarn
-	if *verbose {
-		level = slog.LevelInfo
-	}
+	level := logutils.LogLevel("WARN")
 	if *debug {
-		level = slog.LevelDebug
+		level = logutils.LogLevel("DEBUG")
 	}
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: level,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.LevelKey || a.Key == slog.TimeKey {
-				return slog.Attr{}
-			}
-			return a
-		},
-	})))
-	log := slog.NewLogLogger(slog.Default().Handler(), slog.LevelWarn)
+	filter := &logutils.LevelFilter{
+		Levels:   []logutils.LogLevel{"DEBUG", "WARN", "ERROR"},
+		MinLevel: level,
+		Writer:   os.Stderr,
+	}
+	log.SetOutput(filter)
+	log.SetFlags(0)
 
 	args := flag.Args()
 	if len(args) == 0 {

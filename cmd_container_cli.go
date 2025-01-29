@@ -3,7 +3,7 @@ package ibk
 import (
 	"context"
 	"fmt"
-	"log/slog"
+	"log"
 	"strings"
 
 	"al.essio.dev/pkg/shellescape"
@@ -52,7 +52,7 @@ func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
 	// detect architecture
 	if c.Arch != "" {
 		arch, err := tail1(ctx, t, "arch")
-		slog.InfoContext(ctx, "detected architecture", "arch", arch)
+		log.Printf("Detected architecture %s", arch)
 		if c.Arch != arch {
 			return fmt.Errorf("%w architecture mismatch: %w, output: %s", ErrConfigure, err, arch)
 		}
@@ -65,7 +65,7 @@ func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
 		if err != nil {
 			return fmt.Errorf("%w mktemp: %w, output: %s", ErrConfigure, err, co)
 		}
-		slog.InfoContext(ctx, "created output directory", "dir", c.OutputDir)
+		log.Printf("[DEBUG] Created output directory %s", c.OutputDir)
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func (c *ContainerCliCommand) Push(ctx context.Context, pusher Pusher) error {
 
 	// push blueprint
 	c.blueprintTempfile, err = pusher.Push(ctx, c.Blueprint, "toml")
-	slog.InfoContext(ctx, "pushed blueprint", "file", c.blueprintTempfile)
+	log.Printf("[DEBUG] Pushed blueprint %s", c.blueprintTempfile)
 
 	return err
 }

@@ -20,7 +20,7 @@ clean:
 
 .PHONY: integration-test
 integration-test: build
-	PACKER_PLUGIN_PATH=${ROOT_DIR}${BUILD_DIR} PACKER_LOG=1 PACKER_LOG_PATH=packer.log packer build ${HCL}
+	PACKER_PLUGIN_PATH=${ROOT_DIR}${BUILD_DIR} PACKER_LOG=1 packer build ${HCL}
 
 .PHONY: dev
 dev: build

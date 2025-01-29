@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -68,14 +67,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	ui.Say("Started building image")
-	log.Println("Testing testing")
+	ui.Say("Connecting to the build host " + b.config.BuildHost.Username + "@" + b.config.BuildHost.Hostname)
+
+	// create tail buffer
+	tail := NewTailWriterThrough(1024, os.Stdout)
 
 	// open SSH connection
 	cfg := ibk.SSHTransportConfig{
 		Host:     b.config.BuildHost.Hostname,
 		Username: b.config.BuildHost.Username,
-		Stderr:   os.Stdout,
+		Stdout:   tail,
+		Stderr:   tail,
 	}
 	c, err := ibk.NewSSHTransport(cfg)
 	if err != nil {
@@ -96,10 +98,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// apply the command
-	err = ibk.ApplyCommand(ctx, cmd, c)
+	err = ibk.ApplyCommandPrint(ctx, cmd, c, ui.Say)
 	if err != nil {
 		return nil, err
 	}
 
-	return &artifact{}, nil
+	// create artifact
+	sa := &StringArtifact{}
+	for _, line := range tail.LastLines(10) {
+		sa.WriteString(line)
+	}
+
+	return sa, nil
 }

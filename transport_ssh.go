@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
+	"log"
 	"net"
 	"os"
 	"os/user"
@@ -67,6 +67,7 @@ func ReadPrivateKeys() ([]*bytes.Buffer, error) {
 			continue
 		}
 
+		log.Printf("[DEBUG] Reading private key from %q", f)
 		key, err := os.ReadFile(f)
 		if err != nil {
 			return nil, err
@@ -143,6 +144,7 @@ func NewSSHTransport(cfg SSHTransportConfig) (*SSHTransport, error) {
 	}
 
 	if cfg.KnownHosts != "" {
+		log.Printf("[DEBUG] Using known hosts file %q", cfg.KnownHosts)
 		cb, err := knownhosts.New(cfg.KnownHosts)
 		if err != nil {
 			return nil, fmt.Errorf("known hosts '%s' error: %w", cfg.KnownHosts, err)
@@ -172,6 +174,7 @@ func NewSSHTransport(cfg SSHTransportConfig) (*SSHTransport, error) {
 		cfg.Host = fmt.Sprintf("%s:22", cfg.Host)
 	}
 
+	log.Printf("[DEBUG] Connecting to %q", cfg.Host)
 	client, err := ssh.Dial("tcp", cfg.Host, clientConf)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSSHDial, err)
@@ -231,7 +234,7 @@ func (t *SSHTransport) Execute(ctx context.Context, cmd Command, opts ...Execute
 	}
 
 	command := cmd.Build()
-	slog.DebugContext(ctx, "executing command", "command", command)
+	log.Printf("[DEBUG] Executing command %q", command)
 	err = s.Start(command)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrCommand, err)
@@ -270,7 +273,7 @@ func (t *SSHTransport) Push(ctx context.Context, contents, extension string) (st
 		return "", fmt.Errorf("%w: %w", ErrCopy, err)
 	}
 
-	slog.DebugContext(ctx, "copying to temp file", "file", targetFile, "size", len(contents))
+	log.Printf("[DEBUG] Copying to temp file %q (size %d)", targetFile, len(contents))
 	fmt.Fprintf(w, "C%#o %d %s\n", 0600, len(contents), targetBaseFile)
 	io.Copy(w, strings.NewReader(contents))
 	fmt.Fprint(w, "\x00")
@@ -288,10 +291,10 @@ func (t *SSHTransport) Close(ctx context.Context) error {
 	s, err := t.client.NewSession()
 	if err == nil {
 		for _, file := range t.toDelete {
-			slog.DebugContext(ctx, "deleting file", "file", file)
+			log.Printf("[DEBUG] Deleting file %q", file)
 			err := s.Run(fmt.Sprintf("rm -f %s", file))
 			if err != nil {
-				slog.Warn("failed to delete file", "file", file, "error", err)
+				log.Printf("Failed to delete file %q: %v", file, err)
 			}
 		}
 

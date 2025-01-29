@@ -3,7 +3,7 @@ package ibk
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"log"
 )
 
 // ErrConfigure is returned when an error occurs during configuration.
@@ -42,18 +42,31 @@ type CommonArgs struct {
 	TeeLog bool
 }
 
+type PrintFunc func(string)
+
+var noopPrintFunc = func(string) {}
+
 // ApplyCommand configures, pushes, and executes a command.
 func ApplyCommand(ctx context.Context, c Command, t Transport) error {
+	return ApplyCommandPrint(ctx, c, t, noopPrintFunc)
+}
+
+// ApplyCommand configures, pushes, and executes a command. It logs the command to the provided PrintFunc.
+func ApplyCommandPrint(ctx context.Context, c Command, t Transport, log PrintFunc) error {
+
+	log("Configuring environment")
 	err := c.Configure(ctx, t)
 	if err != nil {
 		return err
 	}
 
+	log("Uploading configuration files")
 	err = c.Push(ctx, t)
 	if err != nil {
 		return err
 	}
 
+	log("Executing the build command")
 	err = t.Execute(ctx, c)
 	if err != nil {
 		return err
@@ -68,14 +81,14 @@ func which(ctx context.Context, exec Executor, name ...string) (string, error) {
 	buf := &CombinedWriter{}
 	for _, n := range name {
 		cmd := "which " + n
-		slog.DebugContext(ctx, "running command", "cmd", cmd)
+		log.Printf("[DEBUG] Running command %q", cmd)
 		err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
 		if err != nil {
 			buf.Reset()
 			continue
 		}
 		if binary := buf.FirstLine(); binary != "" {
-			slog.InfoContext(ctx, "found executable", "exec", binary)
+			log.Printf("[DEBUG] Found executable %q", binary)
 			return binary, nil
 		}
 	}
@@ -84,7 +97,7 @@ func which(ctx context.Context, exec Executor, name ...string) (string, error) {
 
 func exec(ctx context.Context, exec Executor, cmd string) (string, error) {
 	buf := &CombinedWriter{}
-	slog.DebugContext(ctx, "running command", "cmd", cmd)
+	log.Printf("[DEBUG] Running command %q", cmd)
 	err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
 	if err != nil {
 		return "", err
@@ -94,7 +107,7 @@ func exec(ctx context.Context, exec Executor, cmd string) (string, error) {
 
 func tail1(ctx context.Context, exec Executor, cmd string) (string, error) {
 	buf := &CombinedWriter{}
-	slog.DebugContext(ctx, "running command", "cmd", cmd)
+	log.Printf("[DEBUG] Running command %q", cmd)
 	err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
 	if err != nil {
 		return "", err

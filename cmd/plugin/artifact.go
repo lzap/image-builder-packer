@@ -1,28 +1,35 @@
 package main
 
-type artifact struct {
+import "strings"
+
+type StringArtifact struct {
+	sb strings.Builder
 }
 
-func (a artifact) BuilderId() string {
+func (sa *StringArtifact) BuilderId() string {
 	return "osbuild.image-builder"
 }
 
-func (a artifact) Files() []string {
-	return nil
+func (sa *StringArtifact) Files() []string {
+	return []string{}
 }
 
-func (a artifact) Id() string {
+func (sa *StringArtifact) Id() string {
 	return ""
 }
 
-func (a artifact) String() string {
-	return ""
+func (sa *StringArtifact) String() string {
+	return sa.sb.String()
 }
 
-func (a artifact) State(name string) interface{} {
+func (sa *StringArtifact) State(name string) interface{} {
 	return nil
 }
 
-func (a artifact) Destroy() error {
+func (sa *StringArtifact) Destroy() error {
 	return nil
+}
+
+func (sa *StringArtifact) WriteString(s string) {
+	sa.sb.WriteString(s)
 }
