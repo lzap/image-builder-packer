@@ -6,29 +6,23 @@
 # secret. If you would rather own your own GPG handling, please fork this action
 # or use an alternative one for key handling.
 #
+---
 name: release
+
 on:
   push:
     tags:
       - 'v*'
+
 permissions:
   contents: write
   packages: read
+  
+env:
+  GO_VERSION: 1.23.4
+
 jobs:
-  get-go-version:
-    runs-on: ubuntu-latest
-    outputs:
-      go-version: ${{ steps.get-go-version.outputs.go-version }}
-    steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
-      - name: 'Determine Go version'
-        id: get-go-version
-        run: |
-          echo "Found Go $(cat .go-version)"
-          echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
   goreleaser:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +32,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: ${{ env.GO_VERSION }}
       - name: Describe plugin
         id: plugin_describe
         run: echo "api_version=$(go run . describe | jq -r '.api_version')" >> $GITHUB_OUTPUT
