@@ -30,6 +30,11 @@ dev: build
 test:
 	@go test -race ./...
 
+.PHONY: tests
+tests: ## Run all tests (used by CI/CD)
+	@go test -race ./...
+# TODO integration tests as well
+
 .PHONY: install-packer-sdc
 install-packer-sdc:
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@${HASHICORP_PACKER_PLUGIN_SDK_VERSION}
