@@ -29,13 +29,12 @@ func init() {
 		}
 	}
 
-	// metadata can be used in 0.6.0 API
+	// metadata can be used in 0.6.0+ API and beyond
 	_ = metadata
 
 	pps = plugin.NewSet()
 	pps.SetVersion(version.InitializePluginVersion(Version, ""))
 	pps.RegisterBuilder(plugin.DEFAULT_NAME, new(Builder))
-	//pps.RegisterBuilder("image-builder", new(Builder))
 }
 
 func main() {
