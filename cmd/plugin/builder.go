@@ -69,8 +69,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("Connecting to the build host " + b.config.BuildHost.Username + "@" + b.config.BuildHost.Hostname)
 
-	// create tail buffer
-	tail := NewTailWriterThrough(1024, os.Stdout)
+	// create tail 4kB buffer
+	tail := NewTailWriterThrough(2<<11, os.Stderr)
 
 	// open SSH connection
 	cfg := ibk.SSHTransportConfig{
@@ -86,15 +86,29 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	defer c.Close(ctx)
 
 	// configure the command
-	cmd := &ibk.ContainerCliCommand{
-		Distro:    b.config.Distro,
-		Type:      b.config.ImageType,
-		Arch:      b.config.Architecture,
-		Blueprint: b.config.Blueprint,
-		Common: ibk.CommonArgs{
-			DryRun: true,
-			TeeLog: true,
-		},
+	var cmd ibk.Command
+	if b.config.ContainerRepository == "" {
+		cmd = &ibk.ContainerCliCommand{
+			Distro:    b.config.Distro,
+			Type:      b.config.ImageType,
+			Arch:      b.config.Architecture,
+			Blueprint: b.config.Blueprint,
+			Common: ibk.CommonArgs{
+				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") == "true",
+				TeeLog: true,
+			},
+		}
+	} else {
+		cmd = &ibk.ContainerBootCommand{
+			Repository: b.config.ContainerRepository,
+			Type:       b.config.ImageType,
+			Arch:       b.config.Architecture,
+			Blueprint:  b.config.Blueprint,
+			Common: ibk.CommonArgs{
+				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") == "true",
+				TeeLog: true,
+			},
+		}
 	}
 
 	// apply the command
@@ -105,8 +119,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// create artifact
 	sa := &StringArtifact{}
-	for _, line := range tail.LastLines(10) {
+	for _, line := range tail.LastLines(25) {
 		sa.WriteString(line)
+		sa.WriteString("\n")
 	}
 
 	return sa, nil

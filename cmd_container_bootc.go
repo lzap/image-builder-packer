@@ -52,6 +52,8 @@ type ContainerBootCommand struct {
 	awsSecretsTempfile string
 }
 
+var _ Command = &ContainerBootCommand{}
+
 // AWSUploadCommand uploads the image to an S3 bucket and registers it as an AMI.
 type AWSUploadConfig struct {
 	// AWSAccessKeyID credential. Maps to the AWS_ACCESS_KEY_ID environment variable.

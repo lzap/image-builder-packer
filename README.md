@@ -26,9 +26,33 @@ EOF
 
 Cross-architecture building is currently not supported.
 
+## Building using image-builder-cli
+
+Install packer *on your machine* not on the builder instance/VM, for example on Fedora:
+
+```
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+sudo dnf -y install packer
+```
+
+Perform the build via:
+
+      packer build
+
+The image builder plugin will print last several lines from the image builder output as "artifacts", this is where 
+
+To see more detailed output:
+
+      PACKER_LOG=1 packer build
+
+## Dry run
+
+If you want to perform, for any reason, a dry run where the main build command is `echo`ed to the console rather than executed, just set `IMAGE_BUILDER_DRY_RUN=true` environment variable when executing packer.
+
 ## Building without Packer
 
-To test this library directly, do:
+To test this library directly without packer, do:
 
     go run github.com/lzap/packer-plugin-image-builder/cmd/ibpacker/ -help
 
@@ -80,7 +104,6 @@ Apache Version 2.0
 
 ## TODO
 
-* Command for `bootc-image-builder`
-* Packer plugin interface
+* Integration test via packer command with SSH mock server
 * Move to `osbuild` github org
 * Get the code reviewed, make a release

@@ -40,6 +40,8 @@ type ContainerCliCommand struct {
 	blueprintTempfile string
 }
 
+var _ Command = &ContainerCliCommand{}
+
 func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
 	var err error
 
