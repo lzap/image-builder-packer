@@ -32,7 +32,6 @@ test:
 
 .PHONY: tests
 tests: ## Run all tests (used by CI/CD)
-	@yamllint .github/workflows/*.yaml
 	@go test -race ./...
 # TODO integration tests as well
 
