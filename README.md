@@ -36,15 +36,49 @@ sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.c
 sudo dnf -y install packer
 ```
 
+Create a packer template named `template.pkr.hcl`:
+
+```
+packer {
+  required_plugins {
+    image-builder = {
+      source = "github.com/lzap/image-builder"
+      version = ">= 0.0.1"
+    }
+  }
+}
+
+source "image-builder" "example" {
+    build_host {
+        hostname = "zzzap.tpb.lab.eng.brq.redhat.com"
+        username = "builder"
+    }
+
+    container_repository = "quay.io/centos-bootc/centos-bootc:stream9"
+
+    blueprint = <<EOV
+[[customizations.user]]
+name = "user"
+password = "changeme"
+groups = ["wheel"]
+EOV
+
+    image_type = "raw"
+}
+
+build {
+    sources = [ "source.image-builder.example" ]
+}
+```
+
 Perform the build via:
 
-      packer build
+      packer init template.pkr.hcl
+      packer build template.pkr.hcl
 
-The image builder plugin will print last several lines from the image builder output as "artifacts", this is where 
+The image builder plugin will print last several lines from the image builder output as an artifact. To see more detailed output:
 
-To see more detailed output:
-
-      PACKER_LOG=1 packer build
+      PACKER_LOG=1 packer build template.pkr.hcl
 
 ## Dry run
 
