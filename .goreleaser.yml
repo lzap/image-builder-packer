@@ -5,19 +5,7 @@ before:
   hooks:
     - make tests plugin-check
 builds:
-  -
-    id: plugin-check
-    mod_timestamp: '{{ .CommitTimestamp }}'
-    flags:
-      - -trimpath
-    ldflags:
-      - '-s -w -X {{ .ModulePath }}/main.Version={{.Version}} '
-    goos:
-      - linux
-    goarch:
-      - amd64
-    binary: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
-  -
+  - main: ./cmd/plugin
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
