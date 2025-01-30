@@ -43,6 +43,7 @@ func (*FlatAWSUpload) HCL2Spec() map[string]hcldec.Spec {
 type FlatBuildHost struct {
 	Hostname *string `mapstructure:"hostname,required" cty:"hostname" hcl:"hostname"`
 	Username *string `mapstructure:"username,required" cty:"username" hcl:"username"`
+	Password *string `mapstructure:"password" cty:"password" hcl:"password"`
 }
 
 // FlatMapstructure returns a new FlatBuildHost.
@@ -59,6 +60,7 @@ func (*FlatBuildHost) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"hostname": &hcldec.AttrSpec{Name: "hostname", Type: cty.String, Required: false},
 		"username": &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
+		"password": &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
 	}
 	return s
 }
@@ -79,6 +81,7 @@ type FlatConfig struct {
 	Architecture        *string           `mapstructure:"architecture" cty:"architecture" hcl:"architecture"`
 	Blueprint           *string           `mapstructure:"blueprint" cty:"blueprint" hcl:"blueprint"`
 	Distro              *string           `mapstructure:"distro" cty:"distro" hcl:"distro"`
+	RootFS              *string           `mapstructure:"rootfs" cty:"rootfs" hcl:"rootfs"`
 	ContainerRepository *string           `mapstructure:"container_repository" cty:"container_repository" hcl:"container_repository"`
 	AWSUpload           *FlatAWSUpload    `mapstructure:"aws_upload" cty:"aws_upload" hcl:"aws_upload"`
 }
@@ -108,6 +111,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"architecture":               &hcldec.AttrSpec{Name: "architecture", Type: cty.String, Required: false},
 		"blueprint":                  &hcldec.AttrSpec{Name: "blueprint", Type: cty.String, Required: false},
 		"distro":                     &hcldec.AttrSpec{Name: "distro", Type: cty.String, Required: false},
+		"rootfs":                     &hcldec.AttrSpec{Name: "rootfs", Type: cty.String, Required: false},
 		"container_repository":       &hcldec.AttrSpec{Name: "container_repository", Type: cty.String, Required: false},
 		"aws_upload":                 &hcldec.BlockSpec{TypeName: "aws_upload", Nested: hcldec.ObjectSpec((*FlatAWSUpload)(nil).HCL2Spec())},
 	}

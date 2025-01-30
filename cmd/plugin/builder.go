@@ -27,6 +27,7 @@ type Config struct {
 
 	// Regular image build configuration
 	Distro string `mapstructure:"distro"`
+	RootFS string `mapstructure:"rootfs"`
 
 	// Bootable container configuration
 	ContainerRepository string `mapstructure:"container_repository"`
@@ -37,6 +38,7 @@ type Config struct {
 type BuildHost struct {
 	Hostname string `mapstructure:"hostname,required"`
 	Username string `mapstructure:"username,required"`
+	Password string `mapstructure:"password"`
 }
 
 type AWSUpload struct {
@@ -82,6 +84,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	cfg := ibk.SSHTransportConfig{
 		Host:     b.config.BuildHost.Hostname,
 		Username: b.config.BuildHost.Username,
+		Password: b.config.BuildHost.Password,
 		Stdout:   tail,
 		Stderr:   tail,
 	}
@@ -105,9 +108,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 		}
 	} else {
-		cmd = &ibk.ContainerBootCommand{
+		cmdl := &ibk.ContainerBootCommand{
 			Repository: b.config.ContainerRepository,
 			Type:       b.config.ImageType,
+			RootFS:     b.config.RootFS,
 			Arch:       b.config.Architecture,
 			Blueprint:  b.config.Blueprint,
 			Common: ibk.CommonArgs{
@@ -115,6 +119,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				TeeLog: true,
 			},
 		}
+
+		if b.config.AWSUpload.AccessKeyID != "" {
+			cmdl.AWSUploadConfig = &ibk.AWSUploadConfig{
+				AWSAccessKeyID:     b.config.AWSUpload.AccessKeyID,
+				AWSSecretAccessKey: b.config.AWSUpload.SecretAccessKey,
+				AMIName:            b.config.AWSUpload.AmiName,
+				S3Bucket:           b.config.AWSUpload.S3Bucket,
+				Region:             b.config.AWSUpload.Region,
+			}
+		}
+
+		cmd = cmdl
 	}
 
 	// apply the command

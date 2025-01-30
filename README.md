@@ -1,10 +1,10 @@
 # Image Builder Packer plugin
 
-HashiCorp [Packer](https://www.packer.io/) plugin for [image-builder-cli](https://github.com/osbuild/image-builder-cli) and [bootc-image-builder](https://github.com/osbuild/bootc-image-builder).
+HashiCorp [Packer](https://www.packer.io/) plugin for [image-builder-cli](https://github.com/osbuild/image-builder-cli) and [bootc-image-builder](https://github.com/osbuild/bootc-image-builder). Builds are happening on a remote linux machine over SSH.
 
 ## Preparing the environment
 
-All building is done remotely over SSH connection, you need to create an instance or VM with a user dedicated to image building and sudo permission to start podman (or docker) without password.
+All building is done remotely over SSH connection, you need to create an instance or VM with a user dedicated to image building and sudo permission to start podman (or docker) without password or root account.
 
     adduser -m builder
 
@@ -26,7 +26,7 @@ EOF
 
 Cross-architecture building is currently not supported.
 
-## Install packer
+## Install packer
 
 Install packer *on your machine* not on the builder instance/VM, for example on Fedora:
 
@@ -56,7 +56,7 @@ source "image-builder" "example" {
         username = "builder"
     }
 
-    container_repository = "quay.io/centos-bootc/centos-bootc:stream9"
+    distro = "centos-9"
 
     blueprint = <<BLUEPRINT
 [[customizations.user]]
@@ -65,7 +65,7 @@ password = "changeme"
 groups = ["wheel"]
 BLUEPRINT
 
-    image_type = "raw"
+    image_type = "minimal-raw"
 }
 
 build {
@@ -82,7 +82,20 @@ The image builder plugin will print last several lines from the image builder ou
 
       PACKER_LOG=1 packer build template.pkr.hcl
 
-## Building using image-builder-cli
+### Config mapping
+
+For more info: https://github.com/osbuild/image-builder-cli
+
+* **build_host.hostname** - IP or hostname with optional SSH port (required)
+* **build_host.username** - either root or username with sudo permissions (required)
+* **build_host.password** - SSH password when SSH keys are not available
+* **distro** - maps to `--distro`
+* **blueprint** - maps to `--blueprint`
+* **image_type** - maps to image type argument
+
+If there is an option missing, file an issue for us.
+
+## Building using bootc-image-builder
 
 Create a packer template named `template.pkr.hcl`:
 
@@ -127,6 +140,25 @@ Perform the build via:
 The image builder plugin will print last several lines from the image builder output as an artifact. To see more detailed output:
 
       PACKER_LOG=1 packer build template.pkr.hcl
+
+### Config mapping
+
+For more info: https://github.com/osbuild/bootc-image-builder
+
+* **build_host.hostname** - IP or hostname with optional SSH port (required)
+* **build_host.username** - either root or username with sudo permissions (required)
+* **build_host.password** - SSH password when SSH keys are not available
+* **container_repository** - maps to container repository argument
+* **blueprint** - maps to `--blueprint`
+* **image_type** - maps to `--type`
+* **rootfs** - maps to `--rootfs`
+* **aws_upload.ami_name** - maps to AMI cloud uploader configuration
+* **aws_upload.s3_bucket** - maps to AMI cloud uploader configuration
+* **aws_upload.region** - maps to AMI cloud uploader configuration
+* **aws_upload.access_key_id** - maps to AMI cloud uploader configuration
+* **aws_upload.secret_access_key** - maps to AMI cloud uploader configuration
+
+If there is an option missing, file an issue for us.
 
 ## Dry run
 
