@@ -45,7 +45,7 @@ packer {
   required_plugins {
     image-builder = {
       source = "github.com/lzap/image-builder"
-      version = ">= 0.0.1"
+      version = ">= 0.0.2"
     }
   }
 }
@@ -104,7 +104,7 @@ packer {
   required_plugins {
     image-builder = {
       source = "github.com/lzap/image-builder"
-      version = ">= 0.0.1"
+      version = ">= 0.0.2"
     }
   }
 }
