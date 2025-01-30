@@ -78,6 +78,7 @@ type FlatConfig struct {
 	ImageType           *string           `mapstructure:"image_type,required" cty:"image_type" hcl:"image_type"`
 	Architecture        *string           `mapstructure:"architecture" cty:"architecture" hcl:"architecture"`
 	Blueprint           *string           `mapstructure:"blueprint" cty:"blueprint" hcl:"blueprint"`
+	Distro              *string           `mapstructure:"distro" cty:"distro" hcl:"distro"`
 	ContainerRepository *string           `mapstructure:"container_repository" cty:"container_repository" hcl:"container_repository"`
 	AWSUpload           *FlatAWSUpload    `mapstructure:"aws_upload" cty:"aws_upload" hcl:"aws_upload"`
 }
@@ -106,6 +107,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_type":                 &hcldec.AttrSpec{Name: "image_type", Type: cty.String, Required: false},
 		"architecture":               &hcldec.AttrSpec{Name: "architecture", Type: cty.String, Required: false},
 		"blueprint":                  &hcldec.AttrSpec{Name: "blueprint", Type: cty.String, Required: false},
+		"distro":                     &hcldec.AttrSpec{Name: "distro", Type: cty.String, Required: false},
 		"container_repository":       &hcldec.AttrSpec{Name: "container_repository", Type: cty.String, Required: false},
 		"aws_upload":                 &hcldec.BlockSpec{TypeName: "aws_upload", Nested: hcldec.ObjectSpec((*FlatAWSUpload)(nil).HCL2Spec())},
 	}

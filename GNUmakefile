@@ -2,7 +2,8 @@ NAME=image-builder
 ROOT_DIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR=build
 PLUGIN_DIR=${BUILD_DIR}/plugins
-BINARY=packer-plugin-${NAME}_v0.0.0_x5.0_linux_amd64
+VERSION=$(shell git describe --tags --abbrev=0 | cut -b 2-)
+BINARY=packer-plugin-${NAME}_v${VERSION}_x5.0_linux_amd64
 # https://github.com/hashicorp/packer-plugin-sdk/issues/187
 HASHICORP_PACKER_PLUGIN_SDK_VERSION?="v0.5.2"
 PLUGIN_FQN=$(shell grep -E '^module' <go.mod | sed -E 's/module \s*//')
@@ -11,7 +12,7 @@ PLUGIN_PATH=./cmd/plugin
 .PHONY: build
 build:
 	@mkdir -p ${PLUGIN_DIR}
-	@go build -ldflags="-X 'main.Version=$(shell git describe --tags --abbrev=0 | cut -b 2-)'" -o ${PLUGIN_DIR}/${BINARY} ${PLUGIN_PATH}
+	@go build -ldflags="-X 'main.Version=${VERSION}'" -o ${PLUGIN_DIR}/${BINARY} ${PLUGIN_PATH}
 	@sha256sum < ${PLUGIN_DIR}/${BINARY} > ${PLUGIN_DIR}/${BINARY}_SHA256SUM
 
 .PHONY: clean
@@ -19,8 +20,8 @@ clean:
 	@rm -rf ${BUILD_DIR}
 
 .PHONY: integration-test
-integration-test: build
-	PACKER_PLUGIN_PATH=${ROOT_DIR}${BUILD_DIR} PACKER_LOG=1 packer build ${HCL}
+integration-test: build ## Execut a build, use HCL to pass packer template and PACKER_LOG=1 to enable debug
+	PACKER_PLUGIN_PATH=${ROOT_DIR}${BUILD_DIR} packer build ${HCL}
 
 .PHONY: dev
 dev: build

@@ -1,13 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"io"
+	"regexp"
 	"strings"
 	"sync"
 )
 
 // TailWriter implements a byte ring buffer that keeps last N bytes of the
-// written data.
+// written data. It also supports writethrough writer and regexp callback.
 type TailWriter struct {
 	buf    []byte
 	length int
@@ -17,6 +19,14 @@ type TailWriter struct {
 	mu sync.Mutex
 
 	writethrough io.Writer
+	rc           *RegexpCallback
+}
+
+type RegexpCallback struct {
+	Regexp   *regexp.Regexp
+	Prefix   string
+	Callback func(string)
+	m        *bytes.Buffer
 }
 
 // NewTailWriter creates a new TailWriter with the given size.
@@ -30,11 +40,15 @@ func NewTailWriter(size int) *TailWriter {
 	}
 }
 
-// NewTailWriterThrough creates a new TailWriter with the given size and writethrough
-// writer.
-func NewTailWriterThrough(size int, writethrough io.Writer) *TailWriter {
+// NewTailWriterThrough creates a new TailWriter with the given size, the writethrough
+// writer and the regexp callback.
+func NewTailWriterThrough(size int, writethrough io.Writer, rc *RegexpCallback) *TailWriter {
 	tw := NewTailWriter(size)
 	tw.writethrough = writethrough
+	if rc != nil {
+		tw.rc = rc
+		tw.rc.m = &bytes.Buffer{}
+	}
 	return tw
 }
 
@@ -51,6 +65,15 @@ func (tw *TailWriter) Write(p []byte) (n int, err error) {
 			tw.r = tw.w
 		} else {
 			tw.length++
+		}
+	}
+
+	if tw.rc != nil && tw.rc.Regexp != nil && tw.rc.Callback != nil {
+		match := tw.rc.Regexp.Find(p)
+		if match != nil && !bytes.Equal(match, tw.rc.m.Bytes()) {
+			tw.rc.Callback(tw.rc.Prefix + string(match))
+			tw.rc.m.Reset()
+			tw.rc.m.Write(match)
 		}
 	}
 

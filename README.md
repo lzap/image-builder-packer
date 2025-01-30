@@ -26,7 +26,7 @@ EOF
 
 Cross-architecture building is currently not supported.
 
-## Building using image-builder-cli
+## Install packer
 
 Install packer *on your machine* not on the builder instance/VM, for example on Fedora:
 
@@ -35,6 +35,8 @@ sudo dnf install -y dnf-plugins-core
 sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
 sudo dnf -y install packer
 ```
+
+## Building using image-builder-cli
 
 Create a packer template named `template.pkr.hcl`:
 
@@ -50,18 +52,64 @@ packer {
 
 source "image-builder" "example" {
     build_host {
-        hostname = "zzzap.tpb.lab.eng.brq.redhat.com"
+        hostname = "buildhost.example.com"
         username = "builder"
     }
 
     container_repository = "quay.io/centos-bootc/centos-bootc:stream9"
 
-    blueprint = <<EOV
+    blueprint = <<BLUEPRINT
 [[customizations.user]]
 name = "user"
 password = "changeme"
 groups = ["wheel"]
-EOV
+BLUEPRINT
+
+    image_type = "raw"
+}
+
+build {
+    sources = [ "source.image-builder.example" ]
+}
+```
+
+Perform the build via:
+
+      packer init template.pkr.hcl
+      packer build template.pkr.hcl
+
+The image builder plugin will print last several lines from the image builder output as an artifact. To see more detailed output:
+
+      PACKER_LOG=1 packer build template.pkr.hcl
+
+## Building using image-builder-cli
+
+Create a packer template named `template.pkr.hcl`:
+
+```
+packer {
+  required_plugins {
+    image-builder = {
+      source = "github.com/lzap/image-builder"
+      version = ">= 0.0.1"
+    }
+  }
+}
+
+source "image-builder" "example" {
+    build_host {
+        hostname = "buildhost.example.com"
+        username = "builder"
+    }
+
+    container_repository = "quay.io/centos-bootc/centos-bootc:stream9"
+
+    blueprint = <<BLUEPRINT
+[[customizations.user]]
+name = "user"
+password = "changeme"
+groups = ["wheel"]
+BLUEPRINT
 
     image_type = "raw"
 }
@@ -139,5 +187,6 @@ Apache Version 2.0
 ## TODO
 
 * Integration test via packer command with SSH mock server
+* Report stages through writer filter to UI
 * Move to `osbuild` github org
 * Get the code reviewed, make a release

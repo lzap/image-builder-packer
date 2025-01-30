@@ -47,7 +47,7 @@ func TestTailWriterStringWritethough(t *testing.T) {
 			t.Errorf("unexpected tail: got %q, want %q", got, tt.want)
 		}
 
-		tw = NewTailWriterThrough(tt.size, io.Discard)
+		tw = NewTailWriterThrough(tt.size, io.Discard, nil)
 		for _, d := range tt.data {
 			tw.Write([]byte(d))
 		}

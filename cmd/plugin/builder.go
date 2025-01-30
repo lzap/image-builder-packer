@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"os"
+	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -70,7 +71,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	ui.Say("Connecting to the build host " + b.config.BuildHost.Username + "@" + b.config.BuildHost.Hostname)
 
 	// create tail 4kB buffer
-	tail := NewTailWriterThrough(2<<11, os.Stderr)
+	re := &RegexpCallback{
+		Regexp:   regexp.MustCompile(`(\w+\/)?org\.osbuild\.\w+`),
+		Prefix:   "Stage ",
+		Callback: ui.Say,
+	}
+	tail := NewTailWriterThrough(2<<11, os.Stderr, re)
 
 	// open SSH connection
 	cfg := ibk.SSHTransportConfig{
