@@ -3,7 +3,7 @@ env:
   - CGO_ENABLED=0
 before:
   hooks:
-    - CGO_ENABLED=1 make tests plugin-check
+    - make tests plugin-check CGO_ENABLED=1
 builds:
   - main: ./cmd/plugin
     mod_timestamp: '{{ .CommitTimestamp }}'
