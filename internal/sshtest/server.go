@@ -144,7 +144,6 @@ func RequestReplyHandler(t TestLogger, replies []RequestReply) func(ssh.Channel,
 	i := 0
 
 	for i, r := range replies {
-		t.Logf("Compiling regexp: %s", r.Request)
 		replies[i].rr = regexp.MustCompile(r.Request)
 	}
 

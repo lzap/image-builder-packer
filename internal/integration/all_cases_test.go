@@ -107,14 +107,14 @@ func TestIntegration(t *testing.T) {
 				t.Logf("Command returned error: %s", err)
 			}
 
-			if cmd.ProcessState.ExitCode() != tc.Result.Status {
-				t.Fatalf("Expected exit code %d, got %d", tc.Result.Status, cmd.ProcessState.ExitCode())
-			}
-
 			if tc.Result.Grep != "" {
 				if !strings.Contains(string(out), tc.Result.Grep) {
 					t.Fatalf("Expected output to contain %q, got:\n%s", tc.Result.Grep, out)
 				}
+			}
+
+			if cmd.ProcessState.ExitCode() != tc.Result.Status {
+				t.Fatalf("Expected exit code %d, got %d", tc.Result.Status, cmd.ProcessState.ExitCode())
 			}
 
 			t.Log(string(out))
