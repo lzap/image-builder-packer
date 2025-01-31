@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/google/go-cmp/cmp"
@@ -163,10 +162,6 @@ func RequestReplyHandler(t TestLogger, replies []RequestReply) func(ssh.Channel,
 
 			if i >= len(replies) {
 				t.Fatalf("unexpected ssh request: %s, payload: %s", req.Type, payload.Value)
-			}
-
-			if strings.Contains(payload.Value, "sudo") {
-				_ = 1
 			}
 
 			if !replies[i].rr.MatchString(payload.Value) {

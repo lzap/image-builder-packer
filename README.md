@@ -40,6 +40,13 @@ sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.c
 sudo dnf -y install packer
 ```
 
+On MacOS:
+
+```
+brew tap hashicorp/tap
+brew install hashicorp/tap/packer
+```
+
 ## Building using image-builder-cli
 
 Create a packer template named `template.pkr.hcl`:
@@ -76,6 +83,8 @@ build {
     sources = [ "source.image-builder.example" ]
 }
 ```
+
+See [osbuild blueprint reference](https://osbuild.org/docs/user-guide/blueprint-reference/) for more info about blueprint format.
 
 Perform the build via:
 
@@ -136,6 +145,8 @@ build {
 }
 ```
 
+See [osbuild blueprint reference](https://osbuild.org/docs/user-guide/blueprint-reference/) for more info about blueprint format.
+
 Perform the build via:
 
       packer init template.pkr.hcl
@@ -164,9 +175,9 @@ For more info: https://github.com/osbuild/bootc-image-builder
 
 If there is an option missing, file an issue for us.
 
-## Dry run
+## Dry run
 
-If you want to perform, for any reason, a dry run where the main build command is `echo`ed to the console rather than executed, just set `IMAGE_BUILDER_DRY_RUN=true` environment variable when executing packer.
+If you want to perform, for any reason, a dry run where the main build command is `echo`ed to the console rather than executed, just set `IMAGE_BUILDER_DRY_RUN=1` environment variable when executing packer. Good for demos or testing the integration.
 
 ## Building without Packer
 
@@ -206,23 +217,16 @@ go run ./cmd/ibpacker/ \
     -blueprint ./cmd/ibpacker/blueprint_example.toml
 ```
 
-See [osbuild blueprint reference](https://osbuild.org/docs/user-guide/blueprint-reference/) for more info about blueprint format.
-
 ## Testing
 
 To run unit and integration test against mock SSH server running on localhost:
 
-    go test .
+    make test
+
+Do not invoke tests directly via `go test` command because some tests require packer binary to be present in the `./build` directory and will be skipped if it is not present.
 
 Keys in `internal/sshtest/keys.go` are just dummy (test only) keys, you may receive false positives from security scanners about leaked keys when cloning the repo.
 
 ## LICENSE
 
 Apache Version 2.0
-
-## TODO
-
-* Integration test via packer command with SSH mock server
-* Report stages through writer filter to UI
-* Move to `osbuild` github org
-* Get the code reviewed, make a release

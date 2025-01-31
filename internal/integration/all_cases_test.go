@@ -13,9 +13,10 @@ import (
 )
 
 type TestCase struct {
-	Fixtures []sshtest.RequestReply `yaml:"fixtures"`
-	Template string                 `yaml:"template"`
-	Result   TestResult             `yaml:"result"`
+	Fixtures    []sshtest.RequestReply `yaml:"fixtures"`
+	Template    string                 `yaml:"template"`
+	Environment []string               `yaml:"environment"`
+	Result      TestResult             `yaml:"result"`
 }
 
 type TestResult struct {
@@ -101,6 +102,7 @@ func TestIntegration(t *testing.T) {
 
 			cmd := exec.Command(packerBin, command...)
 			cmd.Env = append(cmd.Environ(), "PACKER_LOG=1", "PACKER_PLUGIN_PATH=../../build")
+			cmd.Env = append(cmd.Env, tc.Environment...)
 
 			out, err := cmd.CombinedOutput()
 			if err != nil {

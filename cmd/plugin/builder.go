@@ -103,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Arch:      b.config.Architecture,
 			Blueprint: b.config.Blueprint,
 			Common: ibk.CommonArgs{
-				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") == "true",
+				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") != "",
 				TeeLog: true,
 			},
 		}
@@ -115,7 +115,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Arch:       b.config.Architecture,
 			Blueprint:  b.config.Blueprint,
 			Common: ibk.CommonArgs{
-				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") == "true",
+				DryRun: os.Getenv("IMAGE_BUILDER_DRY_RUN") != "",
 				TeeLog: true,
 			},
 		}

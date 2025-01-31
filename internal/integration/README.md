@@ -17,6 +17,9 @@ fixtures:
     reply: /usr/bin/podman
     status: 0
 
+environment:
+  - ENV_VAR=abc
+
 template: |+
   source "image-builder" "example" {
       build_host {
@@ -39,6 +42,10 @@ A list of fixtures for the SSH mock:
 * `request` (required): Go regular expression capturing the SSH input
 * `response`: optional output of a command
 * `status`: optional exit status (defaults to 0)
+
+### Environment
+
+Optional environment variables to pass to the packer process.
 
 ### Template
 
