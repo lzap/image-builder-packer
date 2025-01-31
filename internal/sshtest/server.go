@@ -3,8 +3,9 @@ package sshtest
 import (
 	"fmt"
 	"net"
+	"regexp"
+	"strings"
 	"sync"
-	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/crypto/ssh"
@@ -16,12 +17,12 @@ type Server struct {
 	Config   *ssh.ServerConfig
 	Handler  func(ssh.Channel, <-chan *ssh.Request)
 
-	t      *testing.T
+	t      TestLogger
 	mu     sync.Mutex
 	closed bool
 }
 
-func NewServer(t *testing.T, hostKey ssh.Signer) *Server {
+func NewServerT(t TestLogger, hostKey ssh.Signer) *Server {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		if ln, err = net.Listen("tcp6", "[::1]:0"); err != nil {
@@ -39,6 +40,10 @@ func NewServer(t *testing.T, hostKey ssh.Signer) *Server {
 	s.start()
 
 	return s
+}
+
+func NewServer(hostKey ssh.Signer) *Server {
+	return NewServerT(noopLogger{}, hostKey)
 }
 
 func (s *Server) start() {
@@ -119,14 +124,30 @@ func NullHandler(ch ssh.Channel, in <-chan *ssh.Request) {
 	sendStatus(ch, 0)
 }
 
+// RequestReply is a single request-reply pair.
 type RequestReply struct {
-	Request string
-	Reply   string
-	Status  uint32
+	// Request is a regular expression that matches the request.
+	Request string `yaml:"request"`
+
+	// Reply is a string that is sent back to the client.
+	Reply string `yaml:"reply"`
+
+	// Status is the ssh exit status code.
+	Status uint32 `yaml:"status,omitempty"`
+
+	rr *regexp.Regexp
 }
 
-func RequestReplyHandler(t *testing.T, replies []RequestReply) func(ssh.Channel, <-chan *ssh.Request) {
+// RequestReplyHandler returns a handler that replies to requests. It fails if
+// the request does not match the expected request.
+func RequestReplyHandler(t TestLogger, replies []RequestReply) func(ssh.Channel, <-chan *ssh.Request) {
 	i := 0
+
+	for i, r := range replies {
+		t.Logf("Compiling regexp: %s", r.Request)
+		replies[i].rr = regexp.MustCompile(r.Request)
+	}
+
 	return func(ch ssh.Channel, in <-chan *ssh.Request) {
 		defer ch.Close()
 
@@ -145,8 +166,14 @@ func RequestReplyHandler(t *testing.T, replies []RequestReply) func(ssh.Channel,
 				t.Fatalf("unexpected ssh request: %s, payload: %s", req.Type, payload.Value)
 			}
 
-			if diff := cmp.Diff(replies[i].Request, payload.Value); diff != "" {
-				t.Fatalf("unexpected ssh request: %s, payload: %s, diff: %s", req.Type, payload.Value, diff)
+			if strings.Contains(payload.Value, "sudo") {
+				_ = 1
+			}
+
+			if !replies[i].rr.MatchString(payload.Value) {
+				if diff := cmp.Diff(replies[i].Request, payload.Value); diff != "" {
+					t.Fatalf("unexpected ssh request: %s, payload: %s, diff: %s", req.Type, payload.Value, diff)
+				}
 			}
 
 			req.Reply(true, nil)

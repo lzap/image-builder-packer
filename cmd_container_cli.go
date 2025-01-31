@@ -54,9 +54,13 @@ func (c *ContainerCliCommand) Configure(ctx context.Context, t Executor) error {
 	// detect architecture
 	if c.Arch != "" {
 		arch, err := tail1(ctx, t, "arch")
+		if err != nil {
+			return fmt.Errorf("%w: arch: %w", ErrConfigure, err)
+		}
+		
 		log.Printf("Detected architecture %s", arch)
 		if c.Arch != arch {
-			return fmt.Errorf("%w architecture mismatch: %w, output: %s", ErrConfigure, err, arch)
+			return fmt.Errorf("%w architecture mismatch: %s", ErrConfigure, arch)
 		}
 	}
 

@@ -3,7 +3,6 @@ package sshtest
 import (
 	"bytes"
 	"encoding/base64"
-	"testing"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -28,7 +27,7 @@ func TestPublicKeyAsSlice() []byte {
 	return []byte(PublicKey)
 }
 
-func TestSigner(t *testing.T) ssh.Signer {
+func TestSigner(t TestLogger) ssh.Signer {
 	signer, err := ssh.ParsePrivateKey(TestPrivateKeyAsSlice())
 	if err != nil {
 		t.Fatalf("failed to parse private key: %v", err)

@@ -81,7 +81,6 @@ func which(ctx context.Context, exec Executor, name ...string) (string, error) {
 	buf := &CombinedWriter{}
 	for _, n := range name {
 		cmd := "which " + n
-		log.Printf("[DEBUG] Running command %q", cmd)
 		err := exec.Execute(ctx, StringCommand(cmd), WithCombinedWriter(buf))
 		if err != nil {
 			buf.Reset()

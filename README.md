@@ -24,7 +24,11 @@ builder ALL=(ALL) NOPASSWD: /usr/bin/podman, /usr/bin/docker
 EOF
 ```
 
-Cross-architecture building is currently not supported.
+Finally, install podman or docker:
+
+    dnf -y install podman
+
+Cross-architecture building is currently not supported so make sure the builder host architecture is correct.
 
 ## Install packer
 

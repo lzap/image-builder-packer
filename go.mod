@@ -6,6 +6,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.19.1
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.32.0
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (

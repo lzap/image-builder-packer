@@ -162,14 +162,14 @@ func TestContainerOverSSH(t *testing.T) {
 					Status:  0,
 				},
 				{
-					Request: "echo sudo /usr/bin/docker run --privileged --rm --pull=newer -i -t "+
-					"--security-opt label=type:unconfined_t "+
-					"-v /var/lib/containers/storage:/var/lib/containers/storage "+
-					"-v ./output-hehwuXP6NyGIr:/output -v /tmp/ibpacker-o2rHJLEEkT68y.toml:/config.toml:ro "+
-					"quay.io/centos-bootc/bootc-image-builder:latest "+
-					"--type raw --local --rootfs btrfs "+
-					"quay.io/centos-bootc/centos-bootc:stream9 2>&1 | tee ./output-hehwuXP6NyGIr/build.log && "+
-					"find ./output-hehwuXP6NyGIr -type f",
+					Request: "echo sudo /usr/bin/docker run --privileged --rm --pull=newer -i -t " +
+						"--security-opt label=type:unconfined_t " +
+						"-v /var/lib/containers/storage:/var/lib/containers/storage " +
+						"-v ./output-hehwuXP6NyGIr:/output -v /tmp/ibpacker-o2rHJLEEkT68y.toml:/config.toml:ro " +
+						"quay.io/centos-bootc/bootc-image-builder:latest " +
+						"--type raw --local --rootfs btrfs " +
+						"quay.io/centos-bootc/centos-bootc:stream9 2>&1 | tee ./output-hehwuXP6NyGIr/build.log && " +
+						"find ./output-hehwuXP6NyGIr -type f",
 					Reply:  "Building...\nDone.\n",
 					Status: 0,
 				},
@@ -216,14 +216,14 @@ func TestContainerOverSSH(t *testing.T) {
 					Status:  0,
 				},
 				{
-					Request: "sudo /usr/bin/podman run --privileged --rm --pull=newer "+
-					"--security-opt label=type:unconfined_t "+
-					"-v /var/lib/containers/storage:/var/lib/containers/storage "+
-					"-v ./output-hehwuXP6NyGIr:/output -v /tmp/ibpacker-o2rHJLEEkT68y.toml:/config.toml:ro "+
-					"quay.io/centos-bootc/bootc-image-builder:latest "+
-					"--type raw --local --rootfs btrfs "+
-					"quay.io/centos-bootc/centos-bootc:stream9 && "+
-					"find ./output-hehwuXP6NyGIr -type f",
+					Request: "sudo /usr/bin/podman run --privileged --rm --pull=newer " +
+						"--security-opt label=type:unconfined_t " +
+						"-v /var/lib/containers/storage:/var/lib/containers/storage " +
+						"-v ./output-hehwuXP6NyGIr:/output -v /tmp/ibpacker-o2rHJLEEkT68y.toml:/config.toml:ro " +
+						"quay.io/centos-bootc/bootc-image-builder:latest " +
+						"--type raw --local --rootfs btrfs " +
+						"quay.io/centos-bootc/centos-bootc:stream9 && " +
+						"find ./output-hehwuXP6NyGIr -type f",
 					Reply:  "Building...\nDone.\n",
 					Status: 0,
 				},
@@ -240,7 +240,7 @@ func TestContainerOverSSH(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ibk.RandSource.Seed(0)
 
-			server := sshtest.NewServer(t, sshtest.TestSigner(t))
+			server := sshtest.NewServerT(t, sshtest.TestSigner(t))
 			server.Handler = sshtest.RequestReplyHandler(t, tt.session)
 			defer server.Close()
 
