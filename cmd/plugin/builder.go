@@ -74,7 +74,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// create tail 4kB buffer
 	re := &RegexpCallback{
-		Regexp:   regexp.MustCompile(`(\w+\/)?org\.osbuild\.\w+`),
+		Regexp:   regexp.MustCompile(`org\.osbuild\.\w+`),
 		Prefix:   "Stage ",
 		Callback: ui.Say,
 	}
