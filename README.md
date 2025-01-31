@@ -223,9 +223,17 @@ To run unit and integration test against mock SSH server running on localhost:
 
     make test
 
-Do not invoke tests directly via `go test` command because some tests require packer binary to be present in the `./build` directory and will be skipped if it is not present.
+Do not invoke tests directly via `go test` command because some tests require packer plugin binary to be present in the `./build` directory. To prevent these tests to be skipped, do this prior running tests directly:
+
+    make build
 
 Keys in `internal/sshtest/keys.go` are just dummy (test only) keys, you may receive false positives from security scanners about leaked keys when cloning the repo.
+
+## Release process
+
+The release process is fully automated, just push a new tag to the main branch and observe GitHub Actions to make a new release. To update plugin in an existing Terraform/Packer project:
+
+    packer init --upgrade .
 
 ## LICENSE
 
